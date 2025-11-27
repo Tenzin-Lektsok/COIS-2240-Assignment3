@@ -2,23 +2,55 @@ import java.util.List;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 public class RentalSystem {
+	
+	// Singleton instance
+    private static RentalSystem instance;
+    
+ // --- Private constructor ---
+    private RentalSystem() {
+        
+    }
+    
+    //getInstance method
+    public static RentalSystem getInstance() {
+    	if(instance == null) {
+    		instance = new RentalSystem();
+    	}
+    	return instance;
+    }
+    
     private List<Vehicle> vehicles = new ArrayList<>();
     private List<Customer> customers = new ArrayList<>();
     private RentalHistory rentalHistory = new RentalHistory();
 
     public void addVehicle(Vehicle vehicle) {
         vehicles.add(vehicle);
+        saveVehicle(vehicle);
     }
 
     public void addCustomer(Customer customer) {
         customers.add(customer);
+        saveCustomer(customer);
     }
+    
 
     public void rentVehicle(Vehicle vehicle, Customer customer, LocalDate date, double amount) {
         if (vehicle.getStatus() == Vehicle.VehicleStatus.Available) {
             vehicle.setStatus(Vehicle.VehicleStatus.Rented);
-            rentalHistory.addRecord(new RentalRecord(vehicle, customer, date, amount, "RENT"));
+            
+          //Create a RentalRecord object
+            RentalRecord record = new RentalRecord(vehicle, customer, date, amount, "RENT");
+
+            //Add the record into rentalHistory
+            rentalHistory.addRecord(record);
+
+            //Save the same record to a file
+            saveRecord(record);
+
             System.out.println("Vehicle rented to " + customer.getCustomerName());
         }
         else {
@@ -29,7 +61,15 @@ public class RentalSystem {
     public void returnVehicle(Vehicle vehicle, Customer customer, LocalDate date, double extraFees) {
         if (vehicle.getStatus() == Vehicle.VehicleStatus.Rented) {
             vehicle.setStatus(Vehicle.VehicleStatus.Available);
-            rentalHistory.addRecord(new RentalRecord(vehicle, customer, date, extraFees, "RETURN"));
+            
+          //create the record
+            RentalRecord record = new RentalRecord(vehicle, customer, date, extraFees, "RETURN");
+
+            // Add to in-memory history
+            rentalHistory.addRecord(record);
+
+            //Also save to file
+            saveRecord(record);
             System.out.println("Vehicle returned by " + customer.getCustomerName());
         }
         else {
@@ -121,4 +161,55 @@ public class RentalSystem {
                 return c;
         return null;
     }
+    
+    private void saveVehicle(Vehicle vehicle) { 
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter("vehicles.txt", true)
+            );
+            writer.write(vehicle.getLicensePlate() + ",");
+            writer.write(vehicle.getMake() + ",");
+            writer.write(vehicle.getModel() + ",");
+            writer.write(vehicle.getYear() + ",");
+            writer.write(vehicle.getStatus() + ",");
+            writer.newLine();
+            writer.close(); 
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void saveCustomer(Customer customer) {
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter("customers.txt", true)
+            );
+            writer.write(customer.getCustomerId() + ",");
+            writer.write(customer.getCustomerName());
+            writer.newLine();
+            writer.close(); 
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+    }
+    
+    private void saveRecord(RentalRecord record) { 
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter("rental_records.txt", true)
+            );
+            writer.write(record.getRecordType() + ",");
+            writer.write(record.getVehicle().getLicensePlate() + ",");
+            writer.write(record.getCustomer().getCustomerId() + ",");
+            writer.write(record.getRecordDate() + ",");
+            writer.write(record.getTotalAmount() + ",");
+            writer.newLine();
+            writer.close(); 
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    
+
+    
 }
