@@ -28,14 +28,31 @@ public class RentalSystem {
     private List<Customer> customers = new ArrayList<>();
     private RentalHistory rentalHistory = new RentalHistory();
 
-    public void addVehicle(Vehicle vehicle) {
+    public boolean addVehicle(Vehicle vehicle) {
+    	//check if vehicle with the same plate already exist.
+    	if(findVehicleByPlate(vehicle.getLicensePlate())!=null) {
+    		System.out.println("A vehicle with plate " + vehicle.getLicensePlate() +
+                    " already exists. Vehicle not added.");
+             return false;// duplication
+    	}
+    	//No duplicate - safe to add
         vehicles.add(vehicle);
         saveVehicle(vehicle);
+        return true;
     }
 
-    public void addCustomer(Customer customer) {
-        customers.add(customer);
-        saveCustomer(customer);
+    public boolean addCustomer(Customer customer) {
+    	
+    	//check if a customer with the same ID is already exists
+    	if(findCustomerById(customer.getCustomerId())!= null) {
+    		System.out.println("A customer with ID " + customer.getCustomerId() + "already exists, so customer not added.");;
+    		return false;
+    		
+    }
+    	// Now no duplicate -safe to add customer
+        customers.add(customer); // at to memory list
+        saveCustomer(customer); //save to file
+        return true;
     }
     
 
