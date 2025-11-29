@@ -1,8 +1,9 @@
 import java.util.List;
 import java.time.LocalDate;
 import java.util.ArrayList;
-
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 public class RentalSystem {
@@ -207,7 +208,100 @@ public class RentalSystem {
             e.printStackTrace();
         }
     }
-
+    // Load Data from files
+    private void loadData() {
+    	loadVehicles();
+    	loadCustomers();
+    	loadRecords();
+    }
+    
+    private void loadVehicles() {
+    	try(BufferedReader reader = new BufferedReader(new FileReader("vehicles.txt"))){
+    		
+    		String line;
+        	while((line =reader.readLine())!= null) {
+        		String[] parts = line.split(",");
+        		
+        		if(parts.length >= 5) {
+        			String plate = parts[0];
+        			String make = parts[1];
+        			String model = parts[2];
+        			int year = Integer.parseInt(parts[3]);
+        			String status = parts[4];
+        			
+        			//create vehicle(default to Car with 5 seat if type unknown
+        			Vehicle vehicle = new Car(make,model, year,5);
+        			vehicle.setLicensePlate(plate);
+        			
+        			// Convert string into enum value
+        			vehicle.setStatus(Vehicle.VehicleStatus.valueOf(status));
+        			
+        			//add to the in-memory list
+        			vehicles.add(vehicle);
+        		}
+        	}System.out.println("Loaded " + vehicles.size() + " vehicles from file");
+    	}
+    	catch(IOException e) {
+    		System.out.println("No vehicles to load.");
+    	}
+    	
+    
+    }
+    
+    
+ // Load customers from file
+    private void loadCustomers() {
+        try (BufferedReader reader = new BufferedReader(new FileReader("customers.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                //expect : id, name
+                if (parts.length >= 2) {
+                    int id = Integer.parseInt(parts[0]);
+                    String name = parts[1];
+                    
+                    Customer customer = new Customer(id, name);
+                    customers.add(customer);
+                }
+            }
+            System.out.println("Loaded " + customers.size() + " customers from file");
+        
+        } catch (IOException e) {
+        	System.out.println("No customers to load or error reading customers.txt");
+        }
+    }
+    
+    
+    
+ // Load rental records from file
+    private void loadRecords() {
+        try (BufferedReader reader = new BufferedReader(new FileReader("rental_records.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length >= 5) {
+                    String recordType = parts[0];
+                    String plate = parts[1];
+                    int customerId = Integer.parseInt(parts[2]);
+                    LocalDate date = LocalDate.parse(parts[3]);
+                    double amount = Double.parseDouble(parts[4]);
+                    
+                    // Find the vehicle and customer
+                    Vehicle vehicle = findVehicleByPlate(plate);
+                    Customer customer = findCustomerById(customerId);
+                    
+                    if (vehicle != null && customer != null) {
+                        RentalRecord record = new RentalRecord(vehicle, customer, date, amount, recordType);
+                        rentalHistory.addRecord(record);
+                    }
+                }
+            }
+            System.out.println("Loaded " + rentalHistory.getRentalHistory().size() + " rental records from file");
+        
+        } catch (IOException e) {
+        	 System.out.println("No rental records to load or error reading rental_records.txt");
+        }
+    }
 
     
 
