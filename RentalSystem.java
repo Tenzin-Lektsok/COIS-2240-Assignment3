@@ -45,7 +45,7 @@ public class RentalSystem {
     	
     	//check if a customer with the same ID is already exists
     	if(findCustomerById(customer.getCustomerId())!= null) {
-    		System.out.println("A customer with ID " + customer.getCustomerId() + "already exists, so customer not added.");;
+    		System.out.println("A customer with ID " + customer.getCustomerId() + "already exists, so customer not added.");
     		return false;
     		
     }
