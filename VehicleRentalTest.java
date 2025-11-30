@@ -1,7 +1,20 @@
-import static org.junit.jupiter.api.Assertions.*; 
+import static org.junit.jupiter.api.Assertions.*; //JUmit 5
+
+import java.time.LocalDate;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;                
 
 public class VehicleRentalTest {
+	
+	//class attribute
+	private RentalSystem rentalSystem;
+	
+	@BeforeEach
+	public void setUp() {
+		//Runs before each test method
+		rentalSystem = RentalSystem.getInstance();
+	}
 
     @Test
 	public void testLicensePlate(){
@@ -11,7 +24,7 @@ public class VehicleRentalTest {
     	//format- vehicle = new Car(make, model, year, seats);
     	Car car1 = new Car ("Toyota","Corolla", 2019, 5);
     	car1.setLicensePlate("AAA100");
-    	assertTrue(car1.getLicensePlate() == "AAA100"); //AAA100 should match
+    	assertTrue(car1.getLicensePlate().equals("AAA100")); //AAA100 should match
     	assertFalse(car1.getLicensePlate() == null);  //AAA100 should not be null
     	
     	
@@ -56,6 +69,48 @@ public class VehicleRentalTest {
             car7.setLicensePlate("ZZZ99");
         });
 	}
+    
+    @Test
+    public void testReturnVehicle() {
+    	
+    	//create vehicle objects
+    	//Parameters format-String make, String model, int year, double cargoSize, boolean hasTrailer
+    	PickupTruck vehicle = new PickupTruck ("Ford", "F-150", 2022, 7, true);
+    	
+    	//set the license plate to AAA111
+    	vehicle.setLicensePlate("AAA111");
+    	
+    	//instantiate customer with ID 1, name =Johnny Deo
+    	Customer customer = new Customer(1, "Johnny Deo");
+    	
+    	//assertEqual check vehicle status equal to "Available"(enum value)
+    	assertEquals(Vehicle.VehicleStatus.Available,vehicle.getStatus());
+    	
+    	//Rent vehicle for first time.
+    	boolean rentSuccess = rentalSystem.rentVehicle(vehicle, customer, LocalDate.now(), 100.0);
+    	
+    	//check rental succeeded
+    	assertTrue(rentSuccess);
+    	assertEquals(Vehicle.VehicleStatus.Rented, vehicle.getStatus());
+    	
+    	//Try renting the same vehicle again and assert that it fails.
+    	boolean rentAgain = rentalSystem.rentVehicle(vehicle, customer, LocalDate.now(), 100.0);
+    	
+    	//Check rental failed
+    	assertFalse(rentAgain);
+    	
+    	//Call returnVehicle() for the same vehicle and customer objects,
+    	boolean returnSuccess = rentalSystem.returnVehicle(vehicle, customer, LocalDate.now(), 15.0);
+    	
+    	//check returning is successful
+    	assertTrue(returnSuccess);
+    	assertEquals(Vehicle.VehicleStatus.Available, vehicle.getStatus());
+    	
+    	//Try returning same vehicle again and assert failed
+    	boolean returnAgain = rentalSystem.returnVehicle(vehicle, customer, LocalDate.now(), 15.0);
+    	assertFalse(returnAgain);
+    
+    }
     
 
 }
