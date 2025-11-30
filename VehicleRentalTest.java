@@ -1,9 +1,9 @@
 import static org.junit.jupiter.api.Assertions.*; //JUmit 5
-
 import java.time.LocalDate;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;                
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 
 public class VehicleRentalTest {
 	
@@ -110,6 +110,26 @@ public class VehicleRentalTest {
     	boolean returnAgain = rentalSystem.returnVehicle(vehicle, customer, LocalDate.now(), 15.0);
     	assertFalse(returnAgain);
     
+    }
+    
+    //create test method testSingletonRentalSystem()- java reflection package
+    @Test
+    public void  testSingletonRentalSystem() {
+    	try {
+    		//constructor
+        	Constructor<RentalSystem> constructor = RentalSystem.class.getDeclaredConstructor();
+        	//get the constructor modifiers
+        	int modifiers = constructor.getModifiers();
+            //Assert constructor is private
+        	assertEquals(Modifier.PRIVATE,modifiers);
+    	}
+    	catch(Exception e){
+    		 fail("Exception occurred while testing Singleton: " + e.getMessage());
+    	}
+    	//get instance by use of given RentalSystem.getInstance()
+    	RentalSystem instance = RentalSystem.getInstance();
+    	//assert it is not null
+    	assertNotNull(instance);
     }
     
 
